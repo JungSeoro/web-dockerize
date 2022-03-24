@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+  react:
+    container_name: react
+    image: node:"${NODE_VERSION}"
+    stdin_open: true
+    ports:
+    - '3000:3000'
+    tty: true   
+    volumes:
+    - ../:/vol
+    command: |
+      sh -c 'cd /vol \
+      && npm install \
+      && npm start'
