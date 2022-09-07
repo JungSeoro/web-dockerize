@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   react:
-    container_name: react
+    container_name: nodejs
     image: node:${NODE_VERSION}
     stdin_open: true
     ports:
