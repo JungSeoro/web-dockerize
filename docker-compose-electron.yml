@@ -2,7 +2,7 @@ version: '3.5'
 services:
   react:
     container_name: electron 
-    image: jungseoro/electron:node${NODE_VERSION}
+    image: jungseoro/electron:wine
     stdin_open: true
     ports:
     - '3000:3000'
@@ -11,8 +11,9 @@ services:
     - ../:/vol
     environment:
     - DISPLAY=unix$DISPLAY
+    - CMD=${CMD}
     tty: true   
     command: |
       sh -c 'cd /vol \
       && npm install \
-      && npm start'
+      && npm run ${CMD:-start}'
