@@ -3,6 +3,12 @@ FROM electronuserland/builder:wine
 LABEL RUN="podman run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY -v $(pwd)/src:/app/src --rm -it electron-wrapper bash"
 
 RUN apt-get update && apt-get install \
-    git libx11-xcb1 libxcb-dri3-0 libxtst6 libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1 libasound2 xorg openbox libnss3 libasound2 libatk-adaptor libgtk-3-0\
+    git libx11-xcb1 libxcb-dri3-0 libxtst6 libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1 libasound2 xorg openbox libnss3 libasound2 libatk-adaptor libgtk-3-0 \
     -yq --no-install-suggests --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN WINE_GEOCKO_VERSION=2.47.4 \
+    && WINE_GEOCKO_URL=https://dl.winehq.org/wine/wine-gecko/$WINE_GEOCKO_VERSION/wine-gecko-$WINE_GEOCKO_VERSION-x86.msi \
+    && wget $WINE_GEOCKO_URL -O /tmp/wine-gecko.msi \
+    && wine msiexec /i /tmp/wine-gecko.msi /q \
+    && rm /tmp/wine-gecko.msi
