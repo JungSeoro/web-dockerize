@@ -2,7 +2,7 @@ version: '3.5'
 services:
   react:
     container_name: electron 
-    image: jungseoro/electron:wine
+    image: jungseoro/electron:wine-gecko
     stdin_open: true
     ports:
     - '3000:3000'
