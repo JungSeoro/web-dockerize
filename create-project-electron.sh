@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Usage: ./create-project-electron.sh <Project Name>
+# Example: ./create-project-electron.sh myapp
+
 PROJECT_NAME=${1:-app}
 export $(cat .env | xargs)
 

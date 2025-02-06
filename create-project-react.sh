@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Usage: ./create-project-react.sh <Project Name>
+# Example: ./create-project-react.sh myapp
+
 PROJECT_NAME=${1:-app}
 export $(cat .env | xargs)
 echo -e "\033[1;94mCreate \033[1;0m\033[1;104m$PROJECT_NAME\033[1;0m\033[1;94m project on Node.js v$NODE_VERSION\033[1;0m"
