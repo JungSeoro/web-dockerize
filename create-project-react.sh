@@ -34,9 +34,9 @@ fi
 rm -f "$DEST_DIR/src/logo.svg"
 rm -f "$DEST_DIR/src/App.css"
 
-mkdir -p $DEST_DIR/{assets,components,constants,hooks,state,services,utils,views}
+mkdir -p $DEST_DIR/src/{assets,components,constants,hooks,state,services,utils,views}
 for dir in assets components constants hooks state services utils views; do
-    touch "$DEST_DIR/$dir/.gitkeep"
+    touch "$DEST_DIR/src/$dir/.gitkeep"
 done
 
 echo -e "\033[1;92mProject \033[1;0m\033[1;104m$PROJECT_NAME\033[1;0m\033[1;92m setup complete! 🚀\033[1;0m"
