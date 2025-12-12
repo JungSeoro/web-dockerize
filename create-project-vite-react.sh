@@ -21,4 +21,11 @@ docker run --rm --user $UID -v "$(pwd)/../:/vol" node:$NODE_VERSION sh -c "
   && rm -rf $PROJECT_NAME
 "
 
+SRC_DIR="../src"
+mkdir -p "$SRC_DIR"
+for dir in components constants hooks store services stories utils views; do
+  mkdir -p "$SRC_DIR/$dir"
+  touch "$SRC_DIR/$dir/.gitkeep"
+done
+
 echo -e "\033[1;92mDone!\033[0m Vite React (react-ts) 프로젝트가 ../ 에 생성되었어."
