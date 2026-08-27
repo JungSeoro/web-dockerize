@@ -1,8 +1,5 @@
-version: '3.5'
-
 services:
   react:
-    container_name: react
     image: node:${NODE_VERSION}
     stdin_open: true
     tty: true
@@ -12,6 +9,5 @@ services:
       - ../:/vol
     working_dir: /vol
     command: >
-      sh -c "npm config set strict-ssl false
-      && npm install
+      sh -c "npm install
       && npm run dev -- --host 0.0.0.0 --port 5173"
