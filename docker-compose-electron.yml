@@ -3,6 +3,8 @@ services:
     image: ${ELECTRON_IMAGE:-jungseoro/electron:linux-dev}
     init: true
     shm_size: 2gb
+    cap_add:
+      - SYS_ADMIN
     stdin_open: true
     tty: true
     working_dir: /workspace
