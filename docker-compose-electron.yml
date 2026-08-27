@@ -1,19 +1,62 @@
-version: '3.5'
 services:
-  react:
-    container_name: electron 
-    image: jungseoro/electron:wine-gecko
+  electron:
+    image: ${ELECTRON_IMAGE:-jungseoro/electron:linux-dev}
+    init: true
+    shm_size: 2gb
     stdin_open: true
-    ports:
-    - '3000:3000'
-    volumes:
-    - '/tmp/.X11-unix:/tmp/.X11-unix' 
-    - ../:/vol
+    tty: true
+    working_dir: /workspace
+    command: ["npm", "run", "${NPM_SCRIPT:-start}"]
+    env_file:
+      - path: ${ELECTRON_ENV_FILE:-../.env}
+        required: false
     environment:
-    - DISPLAY=unix$DISPLAY
-    - CMD=${CMD}
-    tty: true   
-    command: |
-      sh -c 'cd /vol \
-      && npm install \
-      && npm run ${CMD:-start}'
+      DISPLAY: ${DISPLAY:-:0}
+      XAUTHORITY: /tmp/.Xauthority
+      PULSE_SERVER: unix:/tmp/pulse-server
+      ELECTRON_OZONE_PLATFORM: ${ELECTRON_OZONE_PLATFORM:-x11}
+      ELECTRON_NETWORK_MODE: ${ELECTRON_NETWORK_MODE:-bridge}
+      NPM_INSTALL_MODE: ${NPM_INSTALL_MODE:-auto}
+      SKIP_NPM_INSTALL: ${SKIP_NPM_INSTALL:-0}
+      NO_AT_BRIDGE: "1"
+    network_mode: ${ELECTRON_NETWORK_MODE:-bridge}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - type: bind
+        source: ${PROJECT_PATH:-..}
+        target: /workspace
+      - type: volume
+        source: electron_node_modules
+        target: /workspace/node_modules
+      - type: volume
+        source: electron_npm_cache
+        target: /home/node/.npm
+      - type: volume
+        source: electron_config
+        target: /home/node/.config
+      - type: volume
+        source: electron_cache
+        target: /home/node/.cache
+      - type: bind
+        source: ${DOWNLOADS_PATH:-../downloads}
+        target: /home/node/Downloads
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${X11_SOCKET_PATH:-/tmp/.X11-unix}
+        target: /tmp/.X11-unix
+        read_only: true
+      - type: bind
+        source: ${XAUTHORITY:-/dev/null}
+        target: /tmp/.Xauthority
+        read_only: true
+      - type: bind
+        source: ${PULSE_SOCKET:-/dev/null}
+        target: /tmp/pulse-server
+
+volumes:
+  electron_node_modules:
+  electron_npm_cache:
+  electron_config:
+  electron_cache:
