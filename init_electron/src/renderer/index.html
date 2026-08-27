@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electron App</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./index.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="app-card">
+        <p class="eyebrow">Electron</p>
+        <h1 id="app-name">Electron App</h1>
+        <p class="description">Your desktop project is ready.</p>
+        <dl class="app-info">
+          <div>
+            <dt>Version</dt>
+            <dd id="app-version">-</dd>
+          </div>
+          <div>
+            <dt>Platform</dt>
+            <dd id="app-platform">-</dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+  </body>
+</html>
