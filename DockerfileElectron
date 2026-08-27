@@ -1,14 +1,111 @@
-FROM electronuserland/builder:wine
+ARG NODE_VERSION=22
+ARG ELECTRON_SANDBOX_VERSION=43.4.1
 
-LABEL RUN="podman run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY -v $(pwd)/src:/app/src --rm -it electron-wrapper bash"
+FROM node:${NODE_VERSION}-bookworm-slim AS electron-sandbox
 
-RUN apt-get update && apt-get install \
-    git libx11-xcb1 libxcb-dri3-0 libxtst6 libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1 libasound2 xorg openbox libnss3 libasound2 libatk-adaptor libgtk-3-0 \
-    -yq --no-install-suggests --no-install-recommends \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ARG ELECTRON_SANDBOX_VERSION
 
-RUN WINE_GEOCKO_VERSION=2.47.4 \
-    && WINE_GEOCKO_URL=https://dl.winehq.org/wine/wine-gecko/$WINE_GEOCKO_VERSION/wine-gecko-$WINE_GEOCKO_VERSION-x86.msi \
-    && wget $WINE_GEOCKO_URL -O /tmp/wine-gecko.msi \
-    && wine msiexec /i /tmp/wine-gecko.msi /q \
-    && rm /tmp/wine-gecko.msi
+RUN mkdir -p /tmp/electron-sandbox \
+  && chown node:node /tmp/electron-sandbox
+
+USER node
+
+RUN npm install \
+  --prefix /tmp/electron-sandbox \
+  --no-audit \
+  --no-fund \
+  --no-package-lock \
+  --no-save \
+  "electron@${ELECTRON_SANDBOX_VERSION}" \
+  && node /tmp/electron-sandbox/node_modules/electron/install.js \
+  && test -f /tmp/electron-sandbox/node_modules/electron/dist/chrome-sandbox \
+  && test ! -L /tmp/electron-sandbox/node_modules/electron/dist/chrome-sandbox
+
+FROM node:${NODE_VERSION}-bookworm-slim
+
+ARG ELECTRON_SANDBOX_VERSION
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    HOME=/home/node \
+    NPM_CONFIG_CACHE=/home/node/.npm \
+    XDG_CACHE_HOME=/home/node/.cache \
+    XDG_CONFIG_HOME=/home/node/.config \
+    CHROME_DEVEL_SANDBOX=/usr/local/libexec/electron/chrome-sandbox
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    dbus-x11 \
+    fonts-liberation \
+    fonts-noto-cjk \
+    fonts-noto-color-emoji \
+    git \
+    gosu \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libegl1 \
+    libgbm1 \
+    libglib2.0-0 \
+    libgl1 \
+    libgl1-mesa-dri \
+    libgtk-3-0 \
+    libnotify4 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libsecret-1-0 \
+    libvulkan1 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxkbcommon-x11-0 \
+    libxrandr2 \
+    libxshmfence1 \
+    libxss1 \
+    libxtst6 \
+    mesa-vulkan-drivers \
+    pkg-config \
+    python3 \
+    xauth \
+    xdg-utils \
+  && rm -rf /var/lib/apt/lists/*
+
+ARG LOCAL_UID=1000
+ARG LOCAL_GID=1000
+
+RUN current_gid="$(id -g node)" \
+  && if [ "$current_gid" != "$LOCAL_GID" ]; then groupmod --non-unique --gid "$LOCAL_GID" node; fi \
+  && current_uid="$(id -u node)" \
+  && if [ "$current_uid" != "$LOCAL_UID" ]; then usermod --non-unique --uid "$LOCAL_UID" node; fi \
+  && usermod --gid "$LOCAL_GID" node \
+  && mkdir -p /workspace/node_modules /home/node/.npm /home/node/.cache /home/node/.config /home/node/Downloads \
+  && chown -R node:node /workspace /home/node
+
+COPY --from=electron-sandbox --chown=0:0 /tmp/electron-sandbox/node_modules/electron/dist/chrome-sandbox /usr/local/libexec/electron/chrome-sandbox
+
+RUN printf '%s\n' "$ELECTRON_SANDBOX_VERSION" > /usr/local/libexec/electron/version \
+  && chown root:root /usr/local/libexec /usr/local/libexec/electron /usr/local/libexec/electron/chrome-sandbox /usr/local/libexec/electron/version \
+  && chmod 0755 /usr/local/libexec /usr/local/libexec/electron \
+  && chmod 4755 /usr/local/libexec/electron/chrome-sandbox \
+  && chmod 0444 /usr/local/libexec/electron/version
+
+COPY docker-electron-entrypoint.sh /usr/local/bin/docker-electron-entrypoint
+
+RUN chmod 0755 /usr/local/bin/docker-electron-entrypoint
+
+WORKDIR /workspace
+
+ENTRYPOINT ["/usr/local/bin/docker-electron-entrypoint"]
+CMD ["npm", "start"]
