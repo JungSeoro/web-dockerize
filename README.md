@@ -18,6 +18,22 @@ git clone https://github.com/JungSeoro/web-dockerize.git docker
 
 프로젝트 생성 스크립트는 실행 위치와 관계없이 `docker/`의 부모 디렉터리에 파일을 생성합니다. 아래 명령은 모두 프로젝트 루트에서 실행합니다. 신규 프로젝트 루트에는 `docker/`, `.git`, `.gitmodules` 외의 파일이 없어야 하며 생성 실패 시 기존 파일을 변경하지 않습니다.
 
+## 패키지 버전 변경
+
+Node.js를 호스트에 설치하지 않고 Node Docker 이미지로 `package.json`의 버전을 변경하며, `package-lock.json`이 있으면 함께 갱신합니다. Git 커밋과 태그는 생성하지 않습니다.
+
+```bash
+./docker/bump-version.sh patch
+./docker/bump-version.sh pt
+./docker/bump-version.sh minor
+./docker/bump-version.sh mn
+./docker/bump-version.sh major
+./docker/bump-version.sh mj
+./docker/bump-version.sh 1.2.3
+```
+
+`pt`, `mn`, `mj`는 각각 `patch`, `minor`, `major`의 약자입니다. 직접 입력하는 버전은 `x.y.z` 형식의 숫자 버전이어야 합니다. 사용할 Node 이미지 버전은 `docker/.env`의 `NODE_VERSION`을 따릅니다.
+
 ## 환경 선택
 
 | 환경 | 프로젝트 생성 | Compose 파일 | 실행 결과 |
